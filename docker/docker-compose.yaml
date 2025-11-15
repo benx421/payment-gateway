@@ -1,0 +1,69 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mockbank-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mockbank
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - bank-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mockbank"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  bank-api:
+    build:
+      context: ..
+      dockerfile: docker/bank-api/Dockerfile
+    container_name: mockbank-api
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: mockbank
+      DB_SSLMODE: disable
+      PORT: 8080
+      FAILURE_RATE: 0.05
+      MIN_LATENCY_MS: 100
+      MAX_LATENCY_MS: 2000
+      AUTH_EXPIRY_HOURS: 168
+      LOG_LEVEL: debug
+    ports:
+      - "8787:8080"
+    volumes:
+      - ../bank:/app:cached
+      - air_tmp:/app/tmp
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bank-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  bank-network:
+    driver: bridge
+    name: mockbank-network
+
+volumes:
+  postgres_data:
+    name: mockbank-postgres-data
+  air_tmp:
+    name: mockbank-air-tmp
