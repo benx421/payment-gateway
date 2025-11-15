@@ -1,3 +1,4 @@
+// Package main implements the mock bank API server.
 package main
 
 import (
@@ -35,7 +36,12 @@ func main() {
 		logger.Error("failed to connect to database", "error", err)
 		os.Exit(1)
 	}
-	defer database.Close()
+	defer func() {
+		if err = database.Close(); err != nil {
+			logger.Error("failed to close database connection", "error", err)
+		}
+
+	}()
 
 	mux := http.NewServeMux()
 

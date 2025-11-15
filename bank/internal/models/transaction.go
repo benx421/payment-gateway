@@ -9,20 +9,22 @@ import (
 // TransactionType represents the type of transaction
 type TransactionType string
 
+// Transaction type constants
 const (
-	TransactionTypeAuthHold TransactionType = "AUTH_HOLD"
-	TransactionTypeCapture  TransactionType = "CAPTURE"
-	TransactionTypeVoid     TransactionType = "VOID"
-	TransactionTypeRefund   TransactionType = "REFUND"
+	TransactionTypeAuthHold TransactionType = "AUTH_HOLD" // Authorization hold (funds reserved)
+	TransactionTypeCapture  TransactionType = "CAPTURE"   // Capture authorized funds
+	TransactionTypeVoid     TransactionType = "VOID"      // Void/cancel authorization
+	TransactionTypeRefund   TransactionType = "REFUND"    // Refund captured funds
 )
 
 // TransactionStatus represents the status of a transaction
 type TransactionStatus string
 
+// Transaction status constants
 const (
-	TransactionStatusActive    TransactionStatus = "ACTIVE"
-	TransactionStatusCompleted TransactionStatus = "COMPLETED"
-	TransactionStatusExpired   TransactionStatus = "EXPIRED"
+	TransactionStatusActive    TransactionStatus = "ACTIVE"    // Transaction is active (auth holds)
+	TransactionStatusCompleted TransactionStatus = "COMPLETED" // Transaction completed successfully
+	TransactionStatusExpired   TransactionStatus = "EXPIRED"   // Transaction expired (auth timeout)
 )
 
 // Transaction represents a ledger entry for account activity

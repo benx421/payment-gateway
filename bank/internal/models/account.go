@@ -1,3 +1,4 @@
+// Package models defines the domain models for the bank API.
 package models
 
 import (

@@ -20,14 +20,6 @@ linters:
     - errorlint     # Find misuses of errors
     - exhaustive    # Check exhaustiveness of enum switch statements
 
-  exclusions:
-    rules:
-      # Exclude some linters from running on test files
-      - path: _test\.go
-        linters:
-          - gosec
-          - gocritic
-
   settings:
     errcheck:
       check-type-assertions: true
@@ -41,7 +33,7 @@ linters:
 
     gosec:
       excludes:
-        - G104 # Audit errors not checked. errcheck handles this
+        - G104 # Audit errors not checked (errcheck handles this)
 
     gocritic:
       enabled-tags:
@@ -51,17 +43,13 @@ linters:
       disabled-checks:
         - commentedOutCode
 
-formatters:
-  enable:
-    - gofmt         # Check formatting
-    - goimports     # Check imports
-
-issues:
-  max-issues-per-linter: 0
-  max-same-issues: 0
-  exclude-files:
-    - "\\.air\\.toml$"
-    - "tmp/.*"
-  exclude-dirs:
-    - tmp
-    - bin
+  exclusions:
+    rules:
+      # Less strict linting for test files
+      - path: '_test\.go$'
+        linters:
+          - gocritic  # Style checks less important in tests
+      # Exclude linting for generated or temporary files
+      - path: '(^|/)tmp/'
+        linters:
+          - all

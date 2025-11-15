@@ -1,15 +1,17 @@
 FROM golang:1.25.4-alpine3.21
 
-ENV AIR_VERSION=v1.61.7 \
-    GOLANGCI_LINT_VERSION=v1.62.2
+ENV AIR_VERSION=v1.63.0 \
+    GOLANGCI_LINT_VERSION=2.6.2
 
 RUN apk add --no-cache \
     git \
     make \
     curl
 
-RUN go install github.com/air-verse/air@${AIR_VERSION} && \
-    go install github.com/golangci/golangci-lint/cmd/golangci-lint@${GOLANGCI_LINT_VERSION}
+RUN go install github.com/air-verse/air@${AIR_VERSION}
+
+RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | \
+    sh -s -- -b /go/bin v${GOLANGCI_LINT_VERSION}
 
 WORKDIR /app
 

@@ -1,3 +1,4 @@
+// Package db provides database connection and management utilities.
 package db
 
 import (
@@ -53,6 +54,7 @@ func Connect(ctx context.Context, cfg *config.DatabaseConfig, logger *slog.Logge
 	}, nil
 }
 
+// Close closes the database connection and logs the closure.
 func (db *DB) Close() error {
 	db.logger.Info("closing database connection")
 	return db.DB.Close()

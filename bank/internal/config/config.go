@@ -1,3 +1,4 @@
+// Package config handles configuration loading and validation for the bank API.
 package config
 
 import (
@@ -91,6 +92,7 @@ func Load() (*Config, error) {
 	return cfg, nil
 }
 
+// Validate checks if the configuration is valid and returns an error if not.
 func (c *Config) Validate() error {
 	if c.Server.Port == "" {
 		return fmt.Errorf("server port cannot be empty")
