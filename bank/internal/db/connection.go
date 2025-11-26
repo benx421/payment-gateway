@@ -9,9 +9,7 @@ import (
 	"log/slog"
 
 	"github.com/benx421/payment-gateway/bank/internal/config"
-
-	// Import postgres driver for registration with database/sql)
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 )
 
 // Executor defines the interface for executing database queries
@@ -113,4 +111,14 @@ func (tx *Tx) Rollback() error {
 
 	tx.logger.Debug("transaction rolled back")
 	return nil
+}
+
+// IsUniqueViolation checks if the error is a PostgreSQL unique constraint violation
+func IsUniqueViolation(err error) bool {
+	var pqErr *pq.Error
+	if errors.As(err, &pqErr) {
+		// 23505 is the PostgreSQL error code for unique_violation
+		return pqErr.Code == "23505"
+	}
+	return false
 }

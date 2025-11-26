@@ -27,6 +27,7 @@ services:
       dockerfile: docker/bank-api/Dockerfile
     container_name: mockbank-api
     restart: unless-stopped
+    entrypoint: ["/docker-entrypoint.sh", "air", "-c", ".air.toml"]
     environment:
       DB_HOST: postgres
       DB_PORT: 5432

@@ -66,6 +66,9 @@ func (r *transactionRepository) Create(ctx context.Context, tx *models.Transacti
 		tx.CreatedAt,
 	)
 	if err != nil {
+		if db.IsUniqueViolation(err) {
+			return models.ErrDuplicateTransaction
+		}
 		return fmt.Errorf("failed to create transaction: %w", err)
 	}
 

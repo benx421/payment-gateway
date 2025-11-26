@@ -31,6 +31,10 @@ CREATE INDEX idx_transactions_account_id ON transactions(account_id);
 CREATE INDEX idx_transactions_reference_id ON transactions(reference_id);
 CREATE INDEX idx_transactions_type_status ON transactions(type, status);
 
+-- Prevent duplicate captures/voids/refunds for the same authorization/capture
+CREATE UNIQUE INDEX idx_transactions_reference_type_unique ON transactions(reference_id, type)
+WHERE type IN ('CAPTURE', 'VOID', 'REFUND') AND reference_id IS NOT NULL;
+
 -- Create idempotency keys table
 CREATE TABLE idempotency_keys (
     key VARCHAR(255) NOT NULL,

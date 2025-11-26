@@ -11,7 +11,7 @@ done
 echo "PostgreSQL is ready!"
 
 echo "Running database migrations..."
-migrate -path /app/migrations \
+migrate -path /app/internal/db/migrations \
   -database "postgres://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@${DB_HOST:-postgres}:${DB_PORT:-5432}/${DB_NAME:-mockbank}?sslmode=${DB_SSLMODE:-disable}" \
   up
 
