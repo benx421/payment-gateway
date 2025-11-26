@@ -3,7 +3,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"os"
@@ -11,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/benx421/payment-gateway/bank/internal/api"
 	"github.com/benx421/payment-gateway/bank/internal/config"
 	"github.com/benx421/payment-gateway/bank/internal/db"
 )
@@ -51,25 +51,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(map[string]string{
-			"message": "Welcome to Bank API",
-			"version": "1.0.0",
-		}); err != nil {
-			logger.Error("failed to encode welcome response", "error", err)
-		}
-	})
-
-	mux.HandleFunc("GET /health", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(map[string]string{
-			"status": "healthy",
-		}); err != nil {
-			logger.Error("failed to encode health response", "error", err)
-		}
-	})
+	api.RegisterDocsRoutes(mux)
 
 	server := &http.Server{
 		Addr:         ":" + cfg.Server.Port,

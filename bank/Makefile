@@ -1,4 +1,4 @@
-.PHONY: help up down logs restart shell test lint fmt build
+.PHONY: help up down logs restart shell test lint fmt build generate
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -32,5 +32,10 @@ fmt:
 
 build:
 	@cd ../docker && docker compose exec bank-api go build -o bin/bank ./cmd/bank
+
+generate: ## Generate API code from OpenAPI spec
+	@cd api/cfg && go tool oapi-codegen -config dtos.yaml ../openapi.yaml
+	@cd api/cfg && go tool oapi-codegen -config server.yaml ../openapi.yaml
+	@cd api/cfg && go tool oapi-codegen -config spec.yaml ../openapi.yaml
 
 .DEFAULT_GOAL := help

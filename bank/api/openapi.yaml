@@ -1,0 +1,494 @@
+openapi: 3.0.3
+info:
+  title: Bank Mock API
+  description: |
+    This is a mock bank API for payment gateway integration testing.
+    It simulates card authorization, capture, void, and refund operations.
+    This mock Bank API provides basic functionality to test payment flows without real money transactions.
+
+    All POST endpoints require an Idempotency-Key header.
+    5% of requests will randomly fail with 500 errors.
+    All requests have injected latency between 100-2000ms.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8787
+    description: Local development server
+
+tags:
+  - name: Health
+    description: Health and status endpoints
+  - name: Authorization
+    description: Card authorization operations
+  - name: Capture
+    description: Payment capture operations
+  - name: Void
+    description: Authorization void operations
+  - name: Refund
+    description: Refund operations
+
+paths:
+  /health:
+    get:
+      operationId: getHealth
+      summary: Health check
+      tags: [Health]
+      responses:
+        '200':
+          description: Health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/authorizations:
+    post:
+      operationId: createAuthorization
+      summary: Create authorization hold
+      description: Place authorization hold on account funds.
+      tags: [Authorization]
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyRequired'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAuthorizationRequest'
+      responses:
+        '200':
+          description: Authorization created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorizationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '402':
+          $ref: '#/components/responses/PaymentRequired'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/authorizations/{authorizationId}:
+    get:
+      operationId: getAuthorization
+      summary: Get authorization details
+      tags: [Authorization]
+      parameters:
+        - $ref: '#/components/parameters/AuthorizationId'
+      responses:
+        '200':
+          description: Authorization found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorizationResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/captures:
+    post:
+      operationId: createCapture
+      summary: Capture authorization
+      description: Capture a previously authorized hold. Amount must match authorization.
+      tags: [Capture]
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyRequired'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCaptureRequest'
+      responses:
+        '200':
+          description: Capture created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaptureResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/captures/{captureId}:
+    get:
+      operationId: getCapture
+      summary: Get capture details
+      tags: [Capture]
+      parameters:
+        - $ref: '#/components/parameters/CaptureId'
+      responses:
+        '200':
+          description: Capture found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaptureResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/voids:
+    post:
+      operationId: createVoid
+      summary: Void authorization
+      description: Cancel an authorization hold before capture.
+      tags: [Void]
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyRequired'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVoidRequest'
+      responses:
+        '200':
+          description: Void created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoidResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/refunds:
+    post:
+      operationId: createRefund
+      summary: Refund capture
+      description: Refund a captured payment. Amount must match capture.
+      tags: [Refund]
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKeyRequired'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRefundRequest'
+      responses:
+        '200':
+          description: Refund created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefundResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/refunds/{refundId}:
+    get:
+      operationId: getRefund
+      summary: Get refund details
+      tags: [Refund]
+      parameters:
+        - $ref: '#/components/parameters/RefundId'
+      responses:
+        '200':
+          description: Refund found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefundResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  # ============================================================================
+  # Parameters
+  # ============================================================================
+  parameters:
+    IdempotencyKeyRequired:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Unique key for idempotent requests (max 255 chars)
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 255
+
+    AuthorizationId:
+      name: authorizationId
+      in: path
+      required: true
+      description: Authorization ID (format auth_<uuid>)
+      schema:
+        type: string
+        pattern: '^auth_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+
+    CaptureId:
+      name: captureId
+      in: path
+      required: true
+      description: Capture ID (format cap_<uuid>)
+      schema:
+        type: string
+        pattern: '^cap_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+
+    RefundId:
+      name: refundId
+      in: path
+      required: true
+      description: Refund ID (format ref_<uuid>)
+      schema:
+        type: string
+        pattern: '^ref_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+
+  # ============================================================================
+  # Schemas
+  # ============================================================================
+  schemas:
+    # --------------------------------------------------------------------------
+    # Common
+    # --------------------------------------------------------------------------
+    HealthResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorCode'
+        message:
+          type: string
+          example: "Available balance is less than requested amount"
+
+    ErrorCode:
+      type: string
+      enum:
+        - invalid_card
+        - invalid_cvv
+        - invalid_amount
+        - card_expired
+        - insufficient_funds
+        - missing_idempotency_key
+        - authorization_not_found
+        - authorization_expired
+        - authorization_already_used
+        - already_captured
+        - already_voided
+        - already_refunded
+        - amount_mismatch
+        - capture_not_found
+        - refund_not_found
+        - not_found
+        - internal_error
+
+    # --------------------------------------------------------------------------
+    # Authorization
+    # --------------------------------------------------------------------------
+    CreateAuthorizationRequest:
+      type: object
+      required: [card_number, cvv, expiry_month, expiry_year, amount]
+      properties:
+        card_number:
+          type: string
+          description: Card number (Luhn validated)
+          minLength: 13
+          maxLength: 19
+          pattern: '^\d{13,19}$'
+          example: "4532015112830366"
+        cvv:
+          type: string
+          description: Card verification value
+          minLength: 3
+          maxLength: 4
+          pattern: '^\d{3,4}$'
+          example: "123"
+        expiry_month:
+          type: integer
+          minimum: 1
+          maximum: 12
+          example: 12
+        expiry_year:
+          type: integer
+          minimum: 2024
+          maximum: 2099
+          example: 2025
+        amount:
+          type: integer
+          format: int64
+          description: Amount in cents
+          minimum: 1
+          example: 9999
+
+    AuthorizationResponse:
+      type: object
+      required: [authorization_id, status, amount, currency, expires_at, created_at]
+      properties:
+        authorization_id:
+          type: string
+          example: "auth_550e8400-e29b-41d4-a716-446655440000"
+        status:
+          type: string
+          enum: [approved]
+        amount:
+          type: integer
+          format: int64
+          example: 9999
+        currency:
+          type: string
+          example: "USD"
+        expires_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
+    # --------------------------------------------------------------------------
+    # Capture
+    # --------------------------------------------------------------------------
+    CreateCaptureRequest:
+      type: object
+      required: [authorization_id, amount]
+      properties:
+        authorization_id:
+          type: string
+          description: Authorization ID to capture
+          pattern: '^auth_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+          example: "auth_550e8400-e29b-41d4-a716-446655440000"
+        amount:
+          type: integer
+          format: int64
+          description: Amount in cents (must match authorization)
+          minimum: 1
+          example: 9999
+
+    CaptureResponse:
+      type: object
+      required: [capture_id, authorization_id, status, amount, currency, captured_at]
+      properties:
+        capture_id:
+          type: string
+          example: "cap_550e8400-e29b-41d4-a716-446655440001"
+        authorization_id:
+          type: string
+          example: "auth_550e8400-e29b-41d4-a716-446655440000"
+        status:
+          type: string
+          enum: [captured]
+        amount:
+          type: integer
+          format: int64
+          example: 9999
+        currency:
+          type: string
+          example: "USD"
+        captured_at:
+          type: string
+          format: date-time
+
+    # --------------------------------------------------------------------------
+    # Void
+    # --------------------------------------------------------------------------
+    CreateVoidRequest:
+      type: object
+      required: [authorization_id]
+      properties:
+        authorization_id:
+          type: string
+          description: Authorization ID to void
+          pattern: '^auth_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+          example: "auth_550e8400-e29b-41d4-a716-446655440000"
+
+    VoidResponse:
+      type: object
+      required: [void_id, authorization_id, status, voided_at]
+      properties:
+        void_id:
+          type: string
+          example: "void_550e8400-e29b-41d4-a716-446655440002"
+        authorization_id:
+          type: string
+          example: "auth_550e8400-e29b-41d4-a716-446655440000"
+        status:
+          type: string
+          enum: [voided]
+        voided_at:
+          type: string
+          format: date-time
+
+    # --------------------------------------------------------------------------
+    # Refund
+    # --------------------------------------------------------------------------
+    CreateRefundRequest:
+      type: object
+      required: [capture_id, amount]
+      properties:
+        capture_id:
+          type: string
+          description: Capture ID to refund
+          pattern: '^cap_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+          example: "cap_550e8400-e29b-41d4-a716-446655440000"
+        amount:
+          type: integer
+          format: int64
+          description: Amount in cents (must match capture)
+          minimum: 1
+          example: 9999
+
+    RefundResponse:
+      type: object
+      required: [refund_id, capture_id, status, amount, currency, refunded_at]
+      properties:
+        refund_id:
+          type: string
+          example: "ref_550e8400-e29b-41d4-a716-446655440003"
+        capture_id:
+          type: string
+          example: "cap_550e8400-e29b-41d4-a716-446655440001"
+        status:
+          type: string
+          enum: [refunded]
+        amount:
+          type: integer
+          format: int64
+          example: 9999
+        currency:
+          type: string
+          example: "USD"
+        refunded_at:
+          type: string
+          format: date-time
+
+  # ============================================================================
+  # Responses
+  # ============================================================================
+  responses:
+    BadRequest:
+      description: Validation or business logic error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    PaymentRequired:
+      description: Insufficient funds
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
