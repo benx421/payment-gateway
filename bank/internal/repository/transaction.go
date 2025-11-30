@@ -15,6 +15,7 @@ import (
 type TransactionRepository interface {
 	Create(ctx context.Context, tx *models.Transaction) error
 	FindByID(ctx context.Context, id uuid.UUID) (*models.Transaction, error)
+	FindByIDForUpdate(ctx context.Context, id uuid.UUID) (*models.Transaction, error)
 	FindByReferenceID(ctx context.Context, refID uuid.UUID, txnType models.TransactionType) (*models.Transaction, error)
 	UpdateStatus(ctx context.Context, id uuid.UUID, status models.TransactionStatus) error
 }
@@ -82,6 +83,49 @@ func (r *transactionRepository) FindByID(ctx context.Context, id uuid.UUID) (*mo
 		       reference_id, status, expires_at, metadata, created_at
 		FROM transactions
 		WHERE id = $1
+	`
+
+	var tx models.Transaction
+	var metadataJSON []byte
+
+	err := r.exec.QueryRowContext(ctx, query, id).Scan(
+		&tx.ID,
+		&tx.AccountID,
+		&tx.Type,
+		&tx.AmountCents,
+		&tx.Currency,
+		&tx.ReferenceID,
+		&tx.Status,
+		&tx.ExpiresAt,
+		&metadataJSON,
+		&tx.CreatedAt,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("transaction not found: %w", err)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to find transaction: %w", err)
+	}
+
+	if metadataJSON != nil {
+		if err := json.Unmarshal(metadataJSON, &tx.Metadata); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal metadata: %w", err)
+		}
+	}
+
+	return &tx, nil
+}
+
+// FindByIDForUpdate retrieves a transaction by ID with a row lock (SELECT FOR UPDATE)
+// This must be called within a transaction to prevent race conditions
+func (r *transactionRepository) FindByIDForUpdate(ctx context.Context, id uuid.UUID) (*models.Transaction, error) {
+	query := `
+		SELECT id, account_id, type, amount_cents, currency,
+		       reference_id, status, expires_at, metadata, created_at
+		FROM transactions
+		WHERE id = $1
+		FOR UPDATE
 	`
 
 	var tx models.Transaction

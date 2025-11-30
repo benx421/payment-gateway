@@ -10,9 +10,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/benx421/payment-gateway/bank/internal/api"
 	"github.com/benx421/payment-gateway/bank/internal/config"
 	"github.com/benx421/payment-gateway/bank/internal/db"
+	"github.com/benx421/payment-gateway/bank/internal/handlers"
 )
 
 func main() {
@@ -42,20 +42,15 @@ func main() {
 		}
 	}()
 
-	// Cleanup old idempotency keys (older than 24 hours)
-	logger.Info("cleaning up old idempotency keys")
-	cutoffTime := time.Now().Add(-24 * time.Hour)
-	if _, err := database.ExecContext(ctx, "DELETE FROM idempotency_keys WHERE created_at < $1", cutoffTime); err != nil {
-		logger.Warn("failed to cleanup old idempotency keys", "error", err)
-	}
+	// Start periodic cleanup goroutine
+	stopCleanup := make(chan struct{})
+	go runPeriodicCleanup(database, logger, stopCleanup)
 
-	mux := http.NewServeMux()
-
-	api.RegisterDocsRoutes(mux)
+	router := handlers.NewRouter(database, cfg, logger)
 
 	server := &http.Server{
 		Addr:         ":" + cfg.Server.Port,
-		Handler:      mux,
+		Handler:      router,
 		ReadTimeout:  cfg.Server.ReadTimeout,
 		WriteTimeout: cfg.Server.WriteTimeout,
 		IdleTimeout:  cfg.Server.IdleTimeout,
@@ -74,6 +69,7 @@ func main() {
 	<-quit
 
 	logger.Info("shutting down server...")
+	close(stopCleanup)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -83,4 +79,41 @@ func main() {
 	}
 
 	logger.Info("server stopped")
+}
+
+// cleanupIdempotencyKeys removes idempotency keys older than 24 hours
+func cleanupIdempotencyKeys(ctx context.Context, database *db.DB, logger *slog.Logger) {
+	cutoffTime := time.Now().Add(-24 * time.Hour)
+	result, err := database.ExecContext(ctx, "DELETE FROM idempotency_keys WHERE created_at < $1", cutoffTime)
+	if err != nil {
+		logger.Warn("failed to cleanup old idempotency keys", "error", err)
+		return
+	}
+
+	rowsDeleted, err := result.RowsAffected()
+	if err != nil {
+		logger.Warn("failed to get rows affected", "error", err)
+		return
+	}
+	if rowsDeleted > 0 {
+		logger.Info("cleaned up old idempotency keys", "rows_deleted", rowsDeleted)
+	}
+}
+
+// runPeriodicCleanup runs idempotency key cleanup every hour
+func runPeriodicCleanup(database *db.DB, logger *slog.Logger, stop <-chan struct{}) {
+	ticker := time.NewTicker(1 * time.Hour)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			cleanupIdempotencyKeys(ctx, database, logger)
+			cancel()
+		case <-stop:
+			logger.Info("stopping periodic cleanup")
+			return
+		}
+	}
 }

@@ -1,4 +1,4 @@
-.PHONY: help up down logs restart shell test lint fmt build generate
+.PHONY: help up down logs restart shell test lint fmt build generate mocks test-short
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -37,5 +37,11 @@ generate: ## Generate API code from OpenAPI spec
 	@cd api/cfg && go tool oapi-codegen -config dtos.yaml ../openapi.yaml
 	@cd api/cfg && go tool oapi-codegen -config server.yaml ../openapi.yaml
 	@cd api/cfg && go tool oapi-codegen -config spec.yaml ../openapi.yaml
+
+mocks: ## Generate mocks for testing
+	@cd ../docker && docker compose exec -e MOCKERY_VERSION= bank-api mockery
+
+test-short: ## Run unit tests only (no database)
+	@cd ../docker && docker compose exec bank-api go test -v -short ./...
 
 .DEFAULT_GOAL := help

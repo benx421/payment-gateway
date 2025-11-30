@@ -32,7 +32,7 @@ func TestVoidService_PerformVoid(t *testing.T) {
 			Status:      models.TransactionStatusActive,
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(authTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(authTx, nil)
 		mockTxRepo.On("FindByReferenceID", ctx, authID, models.TransactionTypeCapture).Return(nil, nil)
 		mockTxRepo.On("Create", ctx, mock.AnythingOfType("*models.Transaction")).Return(nil)
 		mockTxRepo.On("UpdateStatus", ctx, authID, models.TransactionStatusCompleted).Return(nil)
@@ -59,7 +59,7 @@ func TestVoidService_PerformVoid(t *testing.T) {
 
 		authID := uuid.New()
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(nil, sql.ErrNoRows)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(nil, sql.ErrNoRows)
 
 		result, err := service.performVoid(ctx, mockTxRepo, mockAccountRepo, authID)
 
@@ -93,7 +93,7 @@ func TestVoidService_PerformVoid(t *testing.T) {
 			Status:      models.TransactionStatusCompleted,
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(captureTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(captureTx, nil)
 
 		result, err := service.performVoid(ctx, mockTxRepo, mockAccountRepo, authID)
 
@@ -126,7 +126,7 @@ func TestVoidService_PerformVoid(t *testing.T) {
 			Status:      models.TransactionStatusCompleted, // Already used
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(authTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(authTx, nil)
 
 		result, err := service.performVoid(ctx, mockTxRepo, mockAccountRepo, authID)
 
@@ -169,7 +169,7 @@ func TestVoidService_PerformVoid(t *testing.T) {
 			Status:      models.TransactionStatusCompleted,
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(authTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(authTx, nil)
 		mockTxRepo.On("FindByReferenceID", ctx, authID, models.TransactionTypeCapture).Return(existingCapture, nil)
 
 		result, err := service.performVoid(ctx, mockTxRepo, mockAccountRepo, authID)
@@ -203,7 +203,7 @@ func TestVoidService_PerformVoid(t *testing.T) {
 			Status:      models.TransactionStatusActive,
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(authTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(authTx, nil)
 		mockTxRepo.On("FindByReferenceID", ctx, authID, models.TransactionTypeCapture).Return(nil, assert.AnError)
 
 		result, err := service.performVoid(ctx, mockTxRepo, mockAccountRepo, authID)
@@ -237,7 +237,7 @@ func TestVoidService_PerformVoid(t *testing.T) {
 			Status:      models.TransactionStatusActive,
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(authTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(authTx, nil)
 		mockTxRepo.On("FindByReferenceID", ctx, authID, models.TransactionTypeCapture).Return(nil, nil)
 		mockTxRepo.On("Create", ctx, mock.AnythingOfType("*models.Transaction")).
 			Return(models.ErrDuplicateTransaction)
@@ -273,7 +273,7 @@ func TestVoidService_PerformVoid(t *testing.T) {
 			Status:      models.TransactionStatusActive,
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(authTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(authTx, nil)
 		mockTxRepo.On("FindByReferenceID", ctx, authID, models.TransactionTypeCapture).Return(nil, nil)
 		mockTxRepo.On("Create", ctx, mock.AnythingOfType("*models.Transaction")).Return(nil)
 		mockTxRepo.On("UpdateStatus", ctx, authID, models.TransactionStatusCompleted).
@@ -310,7 +310,7 @@ func TestVoidService_PerformVoid(t *testing.T) {
 			Status:      models.TransactionStatusActive,
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(authTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(authTx, nil)
 		mockTxRepo.On("FindByReferenceID", ctx, authID, models.TransactionTypeCapture).Return(nil, nil)
 		mockTxRepo.On("Create", ctx, mock.AnythingOfType("*models.Transaction")).Return(nil)
 		mockTxRepo.On("UpdateStatus", ctx, authID, models.TransactionStatusCompleted).Return(nil)

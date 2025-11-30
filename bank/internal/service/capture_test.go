@@ -35,7 +35,7 @@ func TestCaptureService_PerformCapture(t *testing.T) {
 			ExpiresAt:   &expiresAt,
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(authTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(authTx, nil)
 		mockTxRepo.On("Create", ctx, mock.AnythingOfType("*models.Transaction")).Return(nil)
 		mockTxRepo.On("UpdateStatus", ctx, authID, models.TransactionStatusCompleted).Return(nil)
 		mockAccountRepo.On("AdjustBalances", ctx, accountID, int64(-10000), int64(0)).Return(nil)
@@ -62,7 +62,7 @@ func TestCaptureService_PerformCapture(t *testing.T) {
 		authID := uuid.New()
 		var amount int64 = 10000
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(nil, sql.ErrNoRows)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(nil, sql.ErrNoRows)
 
 		result, err := service.performCapture(ctx, mockTxRepo, mockAccountRepo, authID, amount)
 
@@ -96,7 +96,7 @@ func TestCaptureService_PerformCapture(t *testing.T) {
 			Status:      models.TransactionStatusCompleted,
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(captureTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(captureTx, nil)
 
 		result, err := service.performCapture(ctx, mockTxRepo, mockAccountRepo, authID, amount)
 
@@ -129,7 +129,7 @@ func TestCaptureService_PerformCapture(t *testing.T) {
 			Status:      models.TransactionStatusCompleted, // Already used
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(authTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(authTx, nil)
 
 		result, err := service.performCapture(ctx, mockTxRepo, mockAccountRepo, authID, amount)
 
@@ -164,7 +164,7 @@ func TestCaptureService_PerformCapture(t *testing.T) {
 			ExpiresAt:   &expiresAt,
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(authTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(authTx, nil)
 
 		result, err := service.performCapture(ctx, mockTxRepo, mockAccountRepo, authID, amount)
 
@@ -198,7 +198,7 @@ func TestCaptureService_PerformCapture(t *testing.T) {
 			Status:      models.TransactionStatusActive,
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(authTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(authTx, nil)
 
 		result, err := service.performCapture(ctx, mockTxRepo, mockAccountRepo, authID, captureAmount)
 
@@ -231,7 +231,7 @@ func TestCaptureService_PerformCapture(t *testing.T) {
 			Status:      models.TransactionStatusActive,
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(authTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(authTx, nil)
 		mockTxRepo.On("Create", ctx, mock.AnythingOfType("*models.Transaction")).
 			Return(models.ErrDuplicateTransaction)
 
@@ -266,7 +266,7 @@ func TestCaptureService_PerformCapture(t *testing.T) {
 			Status:      models.TransactionStatusActive,
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(authTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(authTx, nil)
 		mockTxRepo.On("Create", ctx, mock.AnythingOfType("*models.Transaction")).Return(nil)
 		mockTxRepo.On("UpdateStatus", ctx, authID, models.TransactionStatusCompleted).
 			Return(assert.AnError)
@@ -302,7 +302,7 @@ func TestCaptureService_PerformCapture(t *testing.T) {
 			Status:      models.TransactionStatusActive,
 		}
 
-		mockTxRepo.On("FindByID", ctx, authID).Return(authTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, authID).Return(authTx, nil)
 		mockTxRepo.On("Create", ctx, mock.AnythingOfType("*models.Transaction")).Return(nil)
 		mockTxRepo.On("UpdateStatus", ctx, authID, models.TransactionStatusCompleted).Return(nil)
 		mockAccountRepo.On("AdjustBalances", ctx, accountID, int64(-10000), int64(0)).

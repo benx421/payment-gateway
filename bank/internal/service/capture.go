@@ -64,7 +64,7 @@ func (s *CaptureService) performCapture(
 	authorizationID uuid.UUID,
 	amount int64,
 ) (*models.Transaction, error) {
-	authTxn, err := transactionRepo.FindByID(ctx, authorizationID)
+	authTxn, err := transactionRepo.FindByIDForUpdate(ctx, authorizationID)
 	if err != nil || authTxn.Type != models.TransactionTypeAuthHold {
 		return nil, &ServiceError{
 			Code:    ErrCodeAuthNotFound,

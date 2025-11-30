@@ -1,11 +1,27 @@
 with-expecter: true
-dir: "internal/repository/mocks"
-outpkg: mocks
 resolve-type-alias: false
 disable-version-string: true
 issue-845-fix: true
 packages:
   github.com/benx421/payment-gateway/bank/internal/repository:
+    config:
+      dir: "internal/repository/mocks"
+      outpkg: mocks
     interfaces:
       AccountRepository:
       TransactionRepository:
+  github.com/benx421/payment-gateway/bank/internal/service:
+    config:
+      dir: "internal/service/mocks"
+      outpkg: mocks
+    interfaces:
+      Authorizer:
+      Capturer:
+      Voider:
+      Refunder:
+  github.com/benx421/payment-gateway/bank/internal/middleware:
+    config:
+      dir: "internal/service/mocks"
+      outpkg: mocks
+    interfaces:
+      IdempotencyRepository:

@@ -64,7 +64,7 @@ func (s *RefundService) performRefund(
 	captureID uuid.UUID,
 	amount int64,
 ) (*models.Transaction, error) {
-	captureTxn, err := transactionRepo.FindByID(ctx, captureID)
+	captureTxn, err := transactionRepo.FindByIDForUpdate(ctx, captureID)
 	if err != nil || captureTxn.Type != models.TransactionTypeCapture {
 		return nil, &ServiceError{
 			Code:    ErrCodeCaptureNotFound,

@@ -63,7 +63,7 @@ func (s *VoidService) performVoid(
 	accountRepo repository.AccountRepository,
 	authorizationID uuid.UUID,
 ) (*models.Transaction, error) {
-	authTxn, err := transactionRepo.FindByID(ctx, authorizationID)
+	authTxn, err := transactionRepo.FindByIDForUpdate(ctx, authorizationID)
 	if err != nil || authTxn.Type != models.TransactionTypeAuthHold {
 		return nil, &ServiceError{
 			Code:    ErrCodeAuthNotFound,

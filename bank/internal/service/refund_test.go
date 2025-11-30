@@ -32,7 +32,7 @@ func TestRefundService_PerformRefund(t *testing.T) {
 			Status:      models.TransactionStatusCompleted,
 		}
 
-		mockTxRepo.On("FindByID", ctx, captureID).Return(captureTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, captureID).Return(captureTx, nil)
 		mockTxRepo.On("Create", ctx, mock.AnythingOfType("*models.Transaction")).Return(nil)
 		mockAccountRepo.On("AdjustBalances", ctx, accountID, int64(10000), int64(10000)).Return(nil)
 
@@ -58,7 +58,7 @@ func TestRefundService_PerformRefund(t *testing.T) {
 		captureID := uuid.New()
 		var amount int64 = 10000
 
-		mockTxRepo.On("FindByID", ctx, captureID).Return(nil, sql.ErrNoRows)
+		mockTxRepo.On("FindByIDForUpdate", ctx, captureID).Return(nil, sql.ErrNoRows)
 
 		result, err := service.performRefund(ctx, mockTxRepo, mockAccountRepo, captureID, amount)
 
@@ -92,7 +92,7 @@ func TestRefundService_PerformRefund(t *testing.T) {
 			Status:      models.TransactionStatusActive,
 		}
 
-		mockTxRepo.On("FindByID", ctx, captureID).Return(authTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, captureID).Return(authTx, nil)
 
 		result, err := service.performRefund(ctx, mockTxRepo, mockAccountRepo, captureID, amount)
 
@@ -125,7 +125,7 @@ func TestRefundService_PerformRefund(t *testing.T) {
 			Status:      models.TransactionStatusActive, // Not completed
 		}
 
-		mockTxRepo.On("FindByID", ctx, captureID).Return(captureTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, captureID).Return(captureTx, nil)
 
 		result, err := service.performRefund(ctx, mockTxRepo, mockAccountRepo, captureID, amount)
 
@@ -159,7 +159,7 @@ func TestRefundService_PerformRefund(t *testing.T) {
 			Status:      models.TransactionStatusCompleted,
 		}
 
-		mockTxRepo.On("FindByID", ctx, captureID).Return(captureTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, captureID).Return(captureTx, nil)
 
 		result, err := service.performRefund(ctx, mockTxRepo, mockAccountRepo, captureID, refundAmount)
 
@@ -192,7 +192,7 @@ func TestRefundService_PerformRefund(t *testing.T) {
 			Status:      models.TransactionStatusCompleted,
 		}
 
-		mockTxRepo.On("FindByID", ctx, captureID).Return(captureTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, captureID).Return(captureTx, nil)
 		mockTxRepo.On("Create", ctx, mock.AnythingOfType("*models.Transaction")).
 			Return(models.ErrDuplicateTransaction)
 
@@ -227,7 +227,7 @@ func TestRefundService_PerformRefund(t *testing.T) {
 			Status:      models.TransactionStatusCompleted,
 		}
 
-		mockTxRepo.On("FindByID", ctx, captureID).Return(captureTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, captureID).Return(captureTx, nil)
 		mockTxRepo.On("Create", ctx, mock.AnythingOfType("*models.Transaction")).
 			Return(assert.AnError)
 
@@ -258,7 +258,7 @@ func TestRefundService_PerformRefund(t *testing.T) {
 			Status:      models.TransactionStatusCompleted,
 		}
 
-		mockTxRepo.On("FindByID", ctx, captureID).Return(captureTx, nil)
+		mockTxRepo.On("FindByIDForUpdate", ctx, captureID).Return(captureTx, nil)
 		mockTxRepo.On("Create", ctx, mock.AnythingOfType("*models.Transaction")).Return(nil)
 		mockAccountRepo.On("AdjustBalances", ctx, accountID, int64(10000), int64(10000)).
 			Return(assert.AnError)
