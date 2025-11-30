@@ -305,7 +305,7 @@ components:
           minLength: 13
           maxLength: 19
           pattern: '^\d{13,19}$'
-          example: "4532015112830366"
+          example: "4111111111111111"
         cvv:
           type: string
           description: Card verification value
@@ -322,7 +322,7 @@ components:
           type: integer
           minimum: 2024
           maximum: 2099
-          example: 2025
+          example: 2030
         amount:
           type: integer
           format: int64

@@ -19,7 +19,7 @@ func TestTransactionRepository_Create(t *testing.T) {
 	repo := NewTransactionRepository(database)
 	accountRepo := NewAccountRepository(database)
 
-	account, err := accountRepo.FindByAccountNumber(context.Background(), "4532015112830366")
+	account, err := accountRepo.FindByAccountNumber(context.Background(), "4111111111111111")
 	require.NoError(t, err, "failed to get account")
 
 	tests := []struct {
@@ -108,7 +108,7 @@ func TestTransactionRepository_FindByID(t *testing.T) {
 	repo := NewTransactionRepository(database)
 	accountRepo := NewAccountRepository(database)
 
-	account, err := accountRepo.FindByAccountNumber(context.Background(), "4532015112830366")
+	account, err := accountRepo.FindByAccountNumber(context.Background(), "4111111111111111")
 	require.NoError(t, err, "failed to get account")
 
 	tx := &models.Transaction{
@@ -161,7 +161,7 @@ func TestTransactionRepository_FindByReferenceID(t *testing.T) {
 	repo := NewTransactionRepository(database)
 	accountRepo := NewAccountRepository(database)
 
-	account, err := accountRepo.FindByAccountNumber(context.Background(), "4532015112830366")
+	account, err := accountRepo.FindByAccountNumber(context.Background(), "4111111111111111")
 	require.NoError(t, err, "failed to get account")
 
 	authTx := &models.Transaction{
@@ -236,7 +236,7 @@ func TestTransactionRepository_UpdateStatus(t *testing.T) {
 	repo := NewTransactionRepository(database)
 	accountRepo := NewAccountRepository(database)
 
-	account, err := accountRepo.FindByAccountNumber(context.Background(), "4532015112830366")
+	account, err := accountRepo.FindByAccountNumber(context.Background(), "4111111111111111")
 	require.NoError(t, err, "failed to get account")
 
 	tx := &models.Transaction{

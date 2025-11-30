@@ -23,7 +23,7 @@ func TestAccountRepository_FindByAccountNumber(t *testing.T) {
 	}{
 		{
 			name:          "existing account",
-			accountNumber: "4532015112830366",
+			accountNumber: "4111111111111111",
 			wantErr:       false,
 			wantCVV:       "123",
 		},
@@ -60,7 +60,7 @@ func TestAccountRepository_FindByID(t *testing.T) {
 
 	repo := NewAccountRepository(database)
 
-	existingAccount, setupErr := repo.FindByAccountNumber(context.Background(), "4532015112830366")
+	existingAccount, setupErr := repo.FindByAccountNumber(context.Background(), "4111111111111111")
 	require.NoError(t, setupErr, "failed to get existing account")
 
 	tests := []struct {
@@ -101,7 +101,7 @@ func TestAccountRepository_AdjustBalances(t *testing.T) {
 
 	repo := NewAccountRepository(database)
 
-	account, setupErr := repo.FindByAccountNumber(context.Background(), "4532015112830366")
+	account, setupErr := repo.FindByAccountNumber(context.Background(), "4111111111111111")
 	require.NoError(t, setupErr, "failed to get existing account")
 
 	initialBalance := account.BalanceCents
@@ -206,7 +206,7 @@ func TestAccountRepository_AdjustBalances_Concurrent(t *testing.T) {
 
 	repo := NewAccountRepository(database)
 
-	account, setupErr := repo.FindByAccountNumber(context.Background(), "4532015112830366")
+	account, setupErr := repo.FindByAccountNumber(context.Background(), "4111111111111111")
 	require.NoError(t, setupErr, "failed to get account")
 
 	initialBalance := account.BalanceCents

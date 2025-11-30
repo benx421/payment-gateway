@@ -16,7 +16,7 @@ func TestAuthorizeAndCapture(t *testing.T) {
 	ts := SetupTest(t)
 	defer ts.Close()
 
-	authResp := ts.Authorize(t, "4532015112830366", "123", 10000, "auth-cap-key-1")
+	authResp := ts.Authorize(t, "4111111111111111", "123", 10000, "auth-cap-key-1")
 	require.Equal(t, http.StatusOK, authResp.StatusCode)
 
 	var authBody map[string]any
@@ -44,7 +44,7 @@ func TestAuthorizeAndVoid(t *testing.T) {
 	ts := SetupTest(t)
 	defer ts.Close()
 
-	authResp := ts.Authorize(t, "4532015112830366", "123", 20000, "auth-void-key-1")
+	authResp := ts.Authorize(t, "4111111111111111", "123", 20000, "auth-void-key-1")
 	require.Equal(t, http.StatusOK, authResp.StatusCode)
 
 	var authBody map[string]any
@@ -67,7 +67,7 @@ func TestFullFlow_AuthorizeCaptureRefund(t *testing.T) {
 	ts := SetupTest(t)
 	defer ts.Close()
 
-	authResp := ts.Authorize(t, "4532015112830366", "123", 15000, "full-flow-auth-1")
+	authResp := ts.Authorize(t, "4111111111111111", "123", 15000, "full-flow-auth-1")
 	require.Equal(t, http.StatusOK, authResp.StatusCode)
 
 	var authBody map[string]any
@@ -99,7 +99,7 @@ func TestAuthorization_InvalidCard(t *testing.T) {
 	ts := SetupTest(t)
 	defer ts.Close()
 
-	resp := ts.Authorize(t, "4532015112830367", "123", 10000, "invalid-card-key") // Invalid Luhn
+	resp := ts.Authorize(t, "4111111111111112", "123", 10000, "invalid-card-key") // Invalid Luhn
 	require.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
 	var body map[string]any
@@ -113,7 +113,7 @@ func TestAuthorization_InvalidCVV(t *testing.T) {
 	ts := SetupTest(t)
 	defer ts.Close()
 
-	resp := ts.Authorize(t, "4532015112830366", "999", 10000, "invalid-cvv-key")
+	resp := ts.Authorize(t, "4111111111111111", "999", 10000, "invalid-cvv-key")
 	require.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
 	var body map[string]any
@@ -127,7 +127,7 @@ func TestAuthorization_ExpiredCard(t *testing.T) {
 	ts := SetupTest(t)
 	defer ts.Close()
 
-	resp := ts.Authorize(t, "4024007198964305", "789", 10000, "expired-card-key") // Expiry 03/2024
+	resp := ts.Authorize(t, "5105105105105100", "321", 10000, "expired-card-key") // Expiry 03/2020
 	require.Equal(t, http.StatusBadRequest, resp.StatusCode)
 
 	var body map[string]any
@@ -141,7 +141,7 @@ func TestAuthorization_InsufficientFunds(t *testing.T) {
 	ts := SetupTest(t)
 	defer ts.Close()
 
-	resp := ts.Authorize(t, "4556737586899855", "456", 60000, "insufficient-funds-key") // Balance: $500
+	resp := ts.Authorize(t, "5555555555554444", "789", 100, "insufficient-funds-key") // Balance: $0
 	require.Equal(t, http.StatusPaymentRequired, resp.StatusCode)
 
 	var body map[string]any
@@ -155,7 +155,7 @@ func TestCapture_AuthorizationAlreadyUsed(t *testing.T) {
 	ts := SetupTest(t)
 	defer ts.Close()
 
-	authResp := ts.Authorize(t, "4532015112830366", "123", 10000, "double-cap-auth")
+	authResp := ts.Authorize(t, "4111111111111111", "123", 10000, "double-cap-auth")
 	require.Equal(t, http.StatusOK, authResp.StatusCode)
 
 	var authBody map[string]any
@@ -181,7 +181,7 @@ func TestVoid_AfterCapture(t *testing.T) {
 	ts := SetupTest(t)
 	defer ts.Close()
 
-	authResp := ts.Authorize(t, "4532015112830366", "123", 10000, "void-after-cap-auth")
+	authResp := ts.Authorize(t, "4111111111111111", "123", 10000, "void-after-cap-auth")
 	require.Equal(t, http.StatusOK, authResp.StatusCode)
 
 	var authBody map[string]any
@@ -210,12 +210,12 @@ func TestIdempotency_ReplaysSameResponse(t *testing.T) {
 
 	idempotencyKey := "replay-test-key"
 
-	resp1 := ts.Authorize(t, "4532015112830366", "123", 10000, idempotencyKey)
+	resp1 := ts.Authorize(t, "4111111111111111", "123", 10000, idempotencyKey)
 	require.Equal(t, http.StatusOK, resp1.StatusCode)
 	body1, _ := io.ReadAll(resp1.Body)
 	resp1.Body.Close()
 
-	resp2 := ts.Authorize(t, "4532015112830366", "123", 10000, idempotencyKey)
+	resp2 := ts.Authorize(t, "4111111111111111", "123", 10000, idempotencyKey)
 	require.Equal(t, http.StatusOK, resp2.StatusCode)
 	body2, _ := io.ReadAll(resp2.Body)
 	resp2.Body.Close()
@@ -228,14 +228,14 @@ func TestIdempotency_DifferentKeysCreateDifferentAuthorizations(t *testing.T) {
 	ts := SetupTest(t)
 	defer ts.Close()
 
-	resp1 := ts.Authorize(t, "4532015112830366", "123", 10000, "key-1")
+	resp1 := ts.Authorize(t, "4111111111111111", "123", 10000, "key-1")
 	require.Equal(t, http.StatusOK, resp1.StatusCode)
 
 	var body1 map[string]any
 	require.NoError(t, json.NewDecoder(resp1.Body).Decode(&body1))
 	resp1.Body.Close()
 
-	resp2 := ts.Authorize(t, "4532015112830366", "123", 10000, "key-2")
+	resp2 := ts.Authorize(t, "4111111111111111", "123", 10000, "key-2")
 	require.Equal(t, http.StatusOK, resp2.StatusCode)
 
 	var body2 map[string]any
@@ -249,7 +249,7 @@ func TestConcurrentCaptures_OnlyOneSucceeds(t *testing.T) {
 	ts := SetupTest(t)
 	defer ts.Close()
 
-	authResp := ts.Authorize(t, "4532015112830366", "123", 10000, "concurrent-cap-auth")
+	authResp := ts.Authorize(t, "4111111111111111", "123", 10000, "concurrent-cap-auth")
 	require.Equal(t, http.StatusOK, authResp.StatusCode)
 
 	var authBody map[string]any
@@ -293,7 +293,7 @@ func TestGetAuthorization(t *testing.T) {
 	ts := SetupTest(t)
 	defer ts.Close()
 
-	authResp := ts.Authorize(t, "4532015112830366", "123", 10000, "get-auth-key")
+	authResp := ts.Authorize(t, "4111111111111111", "123", 10000, "get-auth-key")
 	require.Equal(t, http.StatusOK, authResp.StatusCode)
 
 	var authBody map[string]any

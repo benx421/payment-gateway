@@ -69,10 +69,10 @@ func truncateTables(t *testing.T, database *db.DB) {
 	_, err := database.ExecContext(context.Background(), `
 		DELETE FROM accounts;
 		INSERT INTO accounts (account_number, cvv, expiry_month, expiry_year, balance_cents, available_balance_cents) VALUES
-			('4532015112830366', '123', 12, 2025, 1000000, 1000000),
-			('4556737586899855', '456', 6, 2026, 50000, 50000),
-			('5425233430109903', '321', 9, 2025, 5000, 5000),
-			('4024007198964305', '789', 3, 2024, 500000, 500000);
+			('4111111111111111', '123', 12, 2030, 1000000, 1000000),
+			('4242424242424242', '456', 6, 2030, 50000, 50000),
+			('5555555555554444', '789', 9, 2030, 0, 0),
+			('5105105105105100', '321', 3, 2020, 500000, 500000);
 	`)
 	if err != nil {
 		t.Fatalf("failed to reset accounts: %v", err)

@@ -65,14 +65,14 @@ DB_SSLMODE=disable    # SSL mode (default: disable)
 
 ## Test Accounts
 
-The migrations seed the following test accounts:
+The migrations seed the following test accounts (all card numbers pass Luhn validation):
 
-| Card Number      | CVV | Expiry  | Balance  | Notes   |
-|------------------|-----|---------|----------|---------|
-| 4532015112830366 | 123 | 12/2025 | $10,000  | Valid   |
-| 4556737586899855 | 456 | 06/2026 | $500     | Valid   |
-| 5425233430109903 | 321 | 09/2025 | $50      | Valid   |
-| 4024007198964305 | 789 | 03/2024 | $5,000   | Expired |
+| Card Number      | CVV | Expiry  | Balance  | Purpose            |
+|------------------|-----|---------|----------|--------------------|
+| 4111111111111111 | 123 | 12/2030 | $10,000  | Primary test card  |
+| 4242424242424242 | 456 | 06/2030 | $500     | Secondary card     |
+| 5555555555554444 | 789 | 09/2030 | $0       | Zero balance       |
+| 5105105105105100 | 321 | 03/2020 | $5,000   | Expired card       |
 
 ## API Documentation
 

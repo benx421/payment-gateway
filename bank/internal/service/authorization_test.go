@@ -20,7 +20,7 @@ func TestAuthorizationService_PerformAuthorization(t *testing.T) {
 		ctx := context.Background()
 
 		accountID := uuid.New()
-		cardNumber := "4532015112830366"
+		cardNumber := "4111111111111111"
 		cvv := "123"
 		var amount int64 = 10000
 
@@ -59,7 +59,7 @@ func TestAuthorizationService_PerformAuthorization(t *testing.T) {
 		service := NewAuthorizationService(nil, 168)
 		ctx := context.Background()
 
-		cardNumber := "4532015112830366"
+		cardNumber := "4111111111111111"
 		cvv := "123"
 		var amount int64 = 10000
 
@@ -86,7 +86,7 @@ func TestAuthorizationService_PerformAuthorization(t *testing.T) {
 		ctx := context.Background()
 
 		accountID := uuid.New()
-		cardNumber := "4532015112830366"
+		cardNumber := "4111111111111111"
 		cvv := "999" // Wrong CVV
 		var amount int64 = 10000
 
@@ -122,7 +122,7 @@ func TestAuthorizationService_PerformAuthorization(t *testing.T) {
 		ctx := context.Background()
 
 		accountID := uuid.New()
-		cardNumber := "4532015112830366"
+		cardNumber := "4111111111111111"
 		cvv := "123"
 		var amount int64 = 10000
 
@@ -158,7 +158,7 @@ func TestAuthorizationService_PerformAuthorization(t *testing.T) {
 		ctx := context.Background()
 
 		accountID := uuid.New()
-		cardNumber := "4532015112830366"
+		cardNumber := "4111111111111111"
 		cvv := "123"
 		var amount int64 = 10000
 
@@ -194,7 +194,7 @@ func TestAuthorizationService_PerformAuthorization(t *testing.T) {
 		ctx := context.Background()
 
 		accountID := uuid.New()
-		cardNumber := "4532015112830366"
+		cardNumber := "4111111111111111"
 		cvv := "123"
 		var amount int64 = 10000
 
@@ -233,7 +233,7 @@ func TestAuthorizationService_PerformAuthorization(t *testing.T) {
 		ctx := context.Background()
 
 		accountID := uuid.New()
-		cardNumber := "4532015112830366"
+		cardNumber := "4111111111111111"
 		cvv := "123"
 		var amount int64 = 10000
 

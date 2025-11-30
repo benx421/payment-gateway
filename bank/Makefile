@@ -19,7 +19,7 @@ shell:
 	@cd ../docker && docker compose exec bank-api sh
 
 test:
-	@cd ../docker && docker compose exec bank-api go test -v ./...
+	@cd ../docker && docker compose exec bank-api sh -c "go test -v \$$(go list ./... | grep -v /tests) && go test -v -count=1 -p 1 ./tests/..."
 
 test-cover:
 	@cd ../docker && docker compose exec bank-api go test -v -cover ./...

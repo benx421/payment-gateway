@@ -74,7 +74,7 @@ jobs:
         # Run migrations
         migrate -path ./internal/db/migrations -database "postgres://mockbank:mockbank_password@localhost:5432/mockbank?sslmode=disable" up
 
-    - name: Run tests
+    - name: Run unit tests
       working-directory: ./bank
       env:
         DB_HOST: localhost
@@ -83,7 +83,18 @@ jobs:
         DB_PASSWORD: mockbank_password
         DB_NAME: mockbank
         DB_SSLMODE: disable
-      run: go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+      run: go test -v -race -coverprofile=coverage.out -covermode=atomic $(go list ./... | grep -v /tests)
+
+    - name: Run integration tests
+      working-directory: ./bank
+      env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_USER: mockbank
+        DB_PASSWORD: mockbank_password
+        DB_NAME: mockbank
+        DB_SSLMODE: disable
+      run: go test -v -count=1 -p 1 ./tests/...
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4

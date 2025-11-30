@@ -14,12 +14,12 @@ func TestValidateLuhn(t *testing.T) {
 	}{
 		{
 			name:       "valid card number",
-			cardNumber: "4532015112830366",
+			cardNumber: "4111111111111111",
 			wantErr:    false,
 		},
 		{
 			name:       "another valid card",
-			cardNumber: "4556737586899855",
+			cardNumber: "4242424242424242",
 			wantErr:    false,
 		},
 		{
