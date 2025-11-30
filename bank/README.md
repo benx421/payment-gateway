@@ -1,6 +1,6 @@
 # Mock Bank Service
 
-A generic banking API that processes card transactions using a double-entry accounting model with accounts and transaction ledger. Supports authorization holds, captures, voids, and refunds.
+This is a simple generic banking API that processes card transactions using a double-entry accounting model with accounts and transaction ledger. It supports authorization holds, captures, voids, and refunds with idempotency keys.
 
 ## Quick Start
 
@@ -29,9 +29,6 @@ Migrations run automatically when you `make up`. The database schema includes:
 - `transactions`: Transaction ledger (auth holds, captures, voids, refunds)
 - `idempotency_keys`: Request deduplication
 
-
-**Everything runs in Docker** : no need to install Go locally!
-
 ## Available Make Commands
 
 ```bash
@@ -45,11 +42,12 @@ make restart      # Restart API service
 make shell        # Open shell in container
 
 # Testing & Quality (runs inside container)
-make test         # Run tests with race detector
+make test         # Run all tests (unit + integration)
 make test-short   # Run tests (faster, no race detector)
 make lint         # Run golangci-lint
 make fmt          # Format code with gofmt
 make build        # Build binary
+make mocks        # Regenerate mocks with mockery
 ```
 
 ## Database Configuration
@@ -69,36 +67,23 @@ DB_SSLMODE=disable    # SSL mode (default: disable)
 
 The migrations seed the following test accounts:
 
-| Card Number      | CVV | Expiry  | Balance  | Notes    |
-|-----------------|-----|---------|----------|----------|
-| 4532015112830366 | 123 | 12/2025 | $10,000  | Valid    |
-| 4556737586899855 | 456 | 06/2026 | $500     | Valid    |
-| 5425233430109903 | 321 | 09/2025 | $50      | Valid    |
-| 4024007198964305 | 789 | 03/2024 | $5,000   | Expired  |
+| Card Number      | CVV | Expiry  | Balance  | Notes   |
+|------------------|-----|---------|----------|---------|
+| 4532015112830366 | 123 | 12/2025 | $10,000  | Valid   |
+| 4556737586899855 | 456 | 06/2026 | $500     | Valid   |
+| 5425233430109903 | 321 | 09/2025 | $50      | Valid   |
+| 4024007198964305 | 789 | 03/2024 | $5,000   | Expired |
 
-## Migration Management
+## API Documentation
 
-### Creating New Migrations
+Swagger UI available at: <http://localhost:8787/docs>
 
-```bash
-make migrate-create NAME=add_new_feature
-```
+## Chaos Engineering
 
-This creates two files:
-
-- `internal/db/migrations/NNNNNN_add_new_feature.up.sql`: forward migration
-- `internal/db/migrations/NNNNNN_add_new_feature.down.sql`: rollback migration
-
-### Force Migration Version
-
-If migrations get into a bad state:
+The API includes configurable failure injection for testing client resilience:
 
 ```bash
-make migrate-force VERSION=1
-```
-
-### Check Current Version
-
-```bash
-make migrate-version
+FAILURE_RATE=0.05    # 5% of requests return 500
+MIN_LATENCY_MS=100   # Minimum added latency
+MAX_LATENCY_MS=2000  # Maximum added latency
 ```
